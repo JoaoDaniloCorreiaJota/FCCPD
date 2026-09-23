@@ -1,6 +1,8 @@
 package br.com.pedro.mensagens.dominio;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Mensagem {
 
@@ -9,6 +11,7 @@ public class Mensagem {
     private final Usuario destinatario;
     private final String conteudo;
     private final LocalDateTime dataHoraEnvio;
+    private final Set<String> usuariosQueLeram;
 
     public Mensagem(String id, Usuario remetente, Usuario destinatario, String conteudo) {
         this.id = id;
@@ -25,6 +28,8 @@ public class Mensagem {
 
         this.conteudo = conteudo;
         this.dataHoraEnvio = LocalDateTime.now();
+        this.usuariosQueLeram = ConcurrentHashMap.newKeySet();
+        this.usuariosQueLeram.add(remetente.getId());
     }
 
     public String getId() {
@@ -45,5 +50,17 @@ public class Mensagem {
 
     public LocalDateTime getDataHoraEnvio() {
         return dataHoraEnvio;
+    }
+
+    public void marcarComoLida(Usuario usuario) {
+        usuariosQueLeram.add(usuario.getId());
+    }
+
+    public boolean foiLidaPor(Usuario usuario) {
+        return usuariosQueLeram.contains(usuario.getId());
+    }
+
+    public Set<String> getUsuariosQueLeram() {
+        return Set.copyOf(usuariosQueLeram);
     }
 }

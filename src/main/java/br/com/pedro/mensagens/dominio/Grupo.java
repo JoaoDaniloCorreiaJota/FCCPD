@@ -8,11 +8,13 @@ public class Grupo {
     private final String id;
     private String nome;
     private final List<ParticipanteGrupo> participantes;
+    private final List<Mensagem> mensagens;
 
     public Grupo(String id, String nome, Usuario criador) {
         this.id = id;
         this.nome = nome;
         this.participantes = new ArrayList<>();
+        this.mensagens = new ArrayList<>();
 
         participantes.add(
                 new ParticipanteGrupo(criador, true)
@@ -87,5 +89,47 @@ public class Grupo {
         participantes.removeIf(
                 participante -> participante.getUsuario().getId().equals(usuario.getId())
         );
+    }
+
+    public synchronized void adicionarMensagem(Mensagem mensagem) {
+        mensagens.add(mensagem);
+    }
+
+    public List<Mensagem> getMensagens() {
+        return List.copyOf(mensagens);
+    }
+
+    public boolean ehParticipante(Usuario usuario) {
+
+        for (ParticipanteGrupo participante : participantes) {
+            if (participante.getUsuario().getId().equals(usuario.getId())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void marcarMensagemComoLida(Usuario usuario, Mensagem mensagem) {
+
+        if (!ehParticipante(usuario)) {
+            throw new IllegalArgumentException(
+                    "Apenas participantes podem marcar mensagens como lidas."
+            );
+        }
+
+        mensagem.marcarComoLida(usuario);
+    }
+
+    public boolean mensagemFoiLidaPorTodos(Mensagem mensagem) {
+
+        for (ParticipanteGrupo participante : participantes) {
+
+            if (!mensagem.foiLidaPor(participante.getUsuario())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
